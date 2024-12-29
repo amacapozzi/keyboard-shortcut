@@ -24,6 +24,11 @@ func fn() {
 			return
 		}
 
+		log.Printf("hotkey: %v is registered\n", hk)
+		<-hk.Keydown()
+		log.Printf("hotkey: %v is down\n", hk)
+		<-hk.Keyup()
+		log.Printf("hotkey: %v is up\n", hk)
 		msg, err := pressInsertKey()
 
 		if err != nil {
@@ -31,12 +36,6 @@ func fn() {
 		}
 
 		fmt.Println(msg)
-
-		log.Printf("hotkey: %v is registered\n", hk)
-		<-hk.Keydown()
-		log.Printf("hotkey: %v is down\n", hk)
-		<-hk.Keyup()
-		log.Printf("hotkey: %v is up\n", hk)
 		hk.Unregister()
 		log.Printf("hotkey: %v is unregistered\n", hk)
 
