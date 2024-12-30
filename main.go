@@ -3,13 +3,29 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/micmonay/keybd_event"
 	"golang.design/x/hotkey"
 	"golang.design/x/hotkey/mainthread"
+	"golang.org/x/sys/windows/registry"
 )
 
 func main() {
+
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
+	regPath := "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+
+	_, registryError := setRegistryKey(registry.CURRENT_USER, regPath, ex)
+
+	if registryError != nil {
+		log.Panic(err)
+	}
+
 	mainthread.Init(fn)
 
 }
@@ -50,5 +66,27 @@ func pressInsertKey() (string, error) {
 	}
 
 	kbf.SetKeys(keybd_event.VK_INSERT)
+	err = kbf.Launching()
+	if err != nil {
+		return "", err
+	}
 	return "Insert pressed", nil
+}
+
+func setRegistryKey(registryKey registry.Key, registryPath string, value string) (string, error) {
+
+	regKey, err := registry.OpenKey(registryKey, registryPath, registry.ALL_ACCESS)
+
+	if err != nil {
+		return "", err
+	}
+	defer regKey.Close()
+
+	errorStringValue := regKey.SetStringValue("KeyMapper", value)
+
+	if errorStringValue != nil {
+		return "", errorStringValue
+	}
+
+	return "Registry key setted successfully", nil
 }
